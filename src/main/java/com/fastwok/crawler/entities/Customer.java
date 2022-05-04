@@ -12,7 +12,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
     @Column(length = 1000)
-    private String ParentId="402281";
+    private String ParentId="220241";
     private Integer CustomerType=1;
     private String BranchCode="A01";
     private String KiotViet="kiot tranfer";
