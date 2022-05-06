@@ -96,7 +96,7 @@ public class AccdocUtil {
             if (accdocJson.has("discount")) {
                 accDocSale.setDiscount(accdocJson.getLong("discount") * accDocSale.getQuantity());
             }
-            if (accdocJson.has("description")) {
+            if (accdocJson.has("note")) {
                 accDocSale.setDescription(accdocJson.getString("note"));
             }
             accDocSale.setBillId(id);
