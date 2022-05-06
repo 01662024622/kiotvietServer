@@ -13,6 +13,7 @@ public class AccDoc {
     private Long Id;
     private String Kiot_Id="9999999999";
     private String CustomerCode;
+    private String DocNo;
     @Column(length = 2000)
     private String Description="";
     @Transient

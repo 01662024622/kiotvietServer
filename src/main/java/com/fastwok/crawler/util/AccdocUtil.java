@@ -41,6 +41,9 @@ public class AccdocUtil {
             if (accdocJson.has("id")) {
                 accDoc.setId(accdocJson.getLong("id"));
             }
+            if (accdocJson.has("code")) {
+                accDoc.setDocNo(accdocJson.getString("code"));
+            }
             if (accdocJson.has("customerId")) {
                 accDoc.setKiot_Id(String.valueOf(accdocJson.getLong("customerId")));
             }
@@ -94,7 +97,7 @@ public class AccdocUtil {
                 accDocSale.setDiscount(accdocJson.getLong("discount") * accDocSale.getQuantity());
             }
             if (accdocJson.has("description")) {
-                accDocSale.setDescription(accdocJson.getString("description"));
+                accDocSale.setDescription(accdocJson.getString("note"));
             }
             accDocSale.setBillId(id);
             accDocSale.setInventoryId(brandId);
