@@ -83,7 +83,12 @@ public class TaskServiceImpl implements TaskService {
             Customer checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
             if (checkKiotId != null) return;
             Customer checkCode = customerRepository.findCustomerByCode(customer.getCode());
-            if (checkCode != null) return;
+            if (checkCode != null) {
+                if (checkCode.getPersonTel().equals(customer.getPersonTel())) {
+                    checkCode.setKiot_Id(customer.getKiot_Id());
+                    customer = checkCode;
+                }
+            }
             customerRepository.save(customer);
         });
     }
