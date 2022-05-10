@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface AccDocRepository extends JpaRepository<AccDoc, Long> {
+
     @Query(value = "EXEC uspAbahaConvertHDBravo @Id  = ?1", nativeQuery = true)
-    Object runExec(Long id);
+    List<Object> runExec(Long id);
 
     @Modifying
     @Transactional
