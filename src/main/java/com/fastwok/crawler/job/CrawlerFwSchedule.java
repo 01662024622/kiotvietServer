@@ -14,7 +14,7 @@ public class CrawlerFwSchedule {
     @Autowired
     TaskService taskService;
 
-    @Scheduled(fixedDelay = 50000)
+//    @Scheduled(fixedDelay = 50000)
     public void importData() throws  UnirestException {
         taskService.getData();
     }

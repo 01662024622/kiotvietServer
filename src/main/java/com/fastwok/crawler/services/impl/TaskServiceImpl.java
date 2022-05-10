@@ -88,6 +88,10 @@ public class TaskServiceImpl implements TaskService {
                     checkCode.setKiot_Id(customer.getKiot_Id());
                     customer = checkCode;
                 }
+                if (checkCode.getTel().equals(customer.getTel())) {
+                    checkCode.setKiot_Id(customer.getKiot_Id());
+                    customer = checkCode;
+                }
             }
             customerRepository.save(customer);
         });
@@ -100,6 +104,7 @@ public class TaskServiceImpl implements TaskService {
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
         if (!jsonObject.has("data")) return;
+        log.info(jsonObject.toString());
         List<AccDoc> accdocs = AccdocUtil.convert(jsonObject.getJSONArray("data"));
         if (accdocs.isEmpty()) return;
         accdocs.forEach(accdoc -> {

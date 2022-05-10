@@ -22,6 +22,7 @@ public class CustomerUtil {
             }
             if (customerJson.has("contactNumber")){
                 customer.setPersonTel(customerJson.getString("contactNumber"));
+                customer.setTel(customerJson.getString("contactNumber"));
             }
 
             customers.add(customer);

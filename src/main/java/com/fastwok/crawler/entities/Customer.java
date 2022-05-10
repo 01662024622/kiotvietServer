@@ -21,5 +21,6 @@ public class Customer {
     private String Address="";
     private String BillingAddress="";
     private String PersonTel="";
+    private String Tel="";
     private String Kiot_Id;
 }
