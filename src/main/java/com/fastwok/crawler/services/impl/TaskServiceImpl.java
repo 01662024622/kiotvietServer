@@ -80,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
         List<Customer> customers = CustomerUtil.convert(jsonObject.getJSONArray("data"));
         if (customers.isEmpty()) return;
         customers.forEach(customer -> {
-            Customer checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
+            List<Customer> checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
             if (checkKiotId != null) return;
             Customer checkCode = customerRepository.findCustomerByCode(customer.getCode());
             if (checkCode != null) {
@@ -98,7 +98,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public void crawlAccdoc(String today) throws UnirestException {
-//        String param = "?format=json&fromPurchaseDate=2022-05-02T00:00:00&toPurchaseDate=" + today + "T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
+//        String param = "?format=json&fromPurchaseDate=2022-07-12T00:00:00&toPurchaseDate=2022-07-12T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
         String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
         JSONObject res = new JSONObject(authen.getBody());
