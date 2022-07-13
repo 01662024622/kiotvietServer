@@ -73,6 +73,7 @@ public class TaskServiceImpl implements TaskService {
 
     public void crawlCustomer(String today) throws UnirestException {
         String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc";
+//        String paramCustomer = "?lastModifiedFrom=2022-07-12&orderBy=modifiedDate&orderDirection=desc";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
