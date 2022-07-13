@@ -21,6 +21,7 @@ public class AccDoc {
     private Long DiscountRate=0L;
     private Long Payment;
     private Long Total;
+    private String Sale_id;
     @Transient
     private List<AccDocSale> accDocSales;
 }
