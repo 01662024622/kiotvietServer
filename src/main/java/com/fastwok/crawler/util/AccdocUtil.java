@@ -41,6 +41,9 @@ public class AccdocUtil {
             if (accdocJson.has("id")) {
                 accDoc.setId(accdocJson.getLong("id"));
             }
+            if (accdocJson.has("soldById")) {
+                accDoc.setSale_id(accdocJson.getString("soldById"));
+            }
             if (accdocJson.has("code")) {
                 accDoc.setDocNo(accdocJson.getString("code"));
             }
