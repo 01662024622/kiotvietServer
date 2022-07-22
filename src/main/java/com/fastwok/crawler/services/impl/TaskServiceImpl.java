@@ -72,16 +72,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public void crawlCustomer(String today) throws UnirestException {
-        String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc";
+        String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
         if (!jsonObject.has("data")) return;
         List<Customer> customers = CustomerUtil.convert(jsonObject.getJSONArray("data"));
+        log.info(customers.size()+"----------------");
         if (customers.isEmpty()) return;
         customers.forEach(customer -> {
             List<Customer> checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
-            if (checkKiotId != null) return;
+            if (checkKiotId.size()>0) return;
             Customer checkCode = customerRepository.findCustomerByCode(customer.getCode());
             if (checkCode != null) {
                 if (checkCode.getPersonTel().equals(customer.getPersonTel())) {
@@ -95,6 +96,7 @@ public class TaskServiceImpl implements TaskService {
             }
             customerRepository.save(customer);
         });
+        log.info("done");
     }
 
     public void crawlAccdoc(String today) throws UnirestException {
