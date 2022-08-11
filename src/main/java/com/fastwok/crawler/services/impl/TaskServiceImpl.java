@@ -40,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
     private String CLIENT_SECRET = "9BE94DC179BB890F4AB1DC7EFF16F819B10C11C5";
     private String CLIENT_ID = "2c181bb5-10a9-4063-8a94-9e89f20564f0";
     private String URL_TOKEN = "https://id.kiotviet.vn/connect/token";
-    private String URL_API = "https://public.kiotapi.com/";
+    private String URL_API = "https://public2.kiotapi.com/";
     private String CUSTOMER = "customers";
     private String SKU = "products";
     private String ACCDOC = "invoices";
@@ -78,7 +78,6 @@ public class TaskServiceImpl implements TaskService {
         JSONObject jsonObject = res.getJSONObject("object");
         if (!jsonObject.has("data")) return;
         List<Customer> customers = CustomerUtil.convert(jsonObject.getJSONArray("data"));
-        log.info(customers.size()+"----------------");
         if (customers.isEmpty()) return;
         customers.forEach(customer -> {
             List<Customer> checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
@@ -100,8 +99,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public void crawlAccdoc(String today) throws UnirestException {
-//        String param = "?format=json&fromPurchaseDate=2022-05-02T00:00:00&toPurchaseDate=" + today + "T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
-        String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
+//        String param = "?format=json&fromPurchaseDate=2022-08-10T00:00:00&toPurchaseDate=2022-08-10T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
+        String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
+//        String param = "?fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
@@ -125,46 +125,6 @@ public class TaskServiceImpl implements TaskService {
             }
         });
     }
-//    public void getData(String projectId) throws UnirestException {
-//        HttpResponse<JsonNode> response = getListTask(string, projectId);
-//        JSONObject res = new JSONObject(response.getBody());
-//        JSONArray jsonArray = res.getJSONObject("object").getJSONArray("result");
-//        int total = jsonArray.length();
-//        for (int n = 0; n < total; n++) {
-//            JSONArray tasks = jsonArray.getJSONObject(n).getJSONArray("tasks");
-//            for (int y = 0; y < tasks.length(); y++) {
-//                List<TaskUser> taskUsers = new ArrayList<>();
-//                List<SubTask> subTasks = new ArrayList<>();
-//                String id = tasks.getJSONObject(y).get("_id").toString();
-//                Task getTask = taskRepository.getById(id);
-//                JSONObject jsonValues = new JSONObject(getDataDetail(id).getBody()).getJSONObject("result");
-//                if (getTask == null) {
-//                    getTask = new Task();
-//                } else if (jsonValues.getLong("modifiedDate") < getTask.getModifiedDate()) return;
-//
-//                getTask = TaskUtil.convertToTask(jsonValues, getTask);
-//                taskUsers = TaskUtil.getListUser(jsonValues);
-//                subTasks = TaskUtil.getListSubTask(jsonValues);
-//                getTask.setProject_id(projectId);
-//                taskRepository.save(getTask);
-//                if (taskUsers != null) {
-//                    taskUsers.forEach(element -> {
-//                        TaskUser taskUser = taskUserRepository.checkExist(element.getTaskId(), element.getUser());
-//                        if (taskUser == null) {
-//                            taskUserRepository.save(element);
-//                        }
-//                    });
-//                }
-//                if (subTasks != null) {
-//                    subTasks.forEach(element -> {
-//                        subTaskRepository.save(element);
-//                    });
-//                }
-//            }
-//
-//        }
-//    }
-
     private HttpResponse<JsonNode> OAuth2(String body)
             throws UnirestException {
         Date date = new Date();

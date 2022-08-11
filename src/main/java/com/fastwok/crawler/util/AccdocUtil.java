@@ -18,7 +18,6 @@ public class AccdocUtil {
         inventoryMap = new HashMap<>();
         inventoryMap.put(63506L, 219321L);
         inventoryMap.put(164049L, 219201L);
-        inventoryMap.put(19576L, 218761L);
         inventoryMap.put(19578L, 218841L);
         inventoryMap.put(3634L, 219081L);
         inventoryMap.put(58187L, 219001L);
