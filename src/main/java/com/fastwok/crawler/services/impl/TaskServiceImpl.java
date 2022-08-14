@@ -40,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
     private String CLIENT_SECRET = "9BE94DC179BB890F4AB1DC7EFF16F819B10C11C5";
     private String CLIENT_ID = "2c181bb5-10a9-4063-8a94-9e89f20564f0";
     private String URL_TOKEN = "https://id.kiotviet.vn/connect/token";
-    private String URL_API = "https://public2.kiotapi.com/";
+    private String URL_API = "https://public.kiotapi2.com/";
     private String CUSTOMER = "customers";
     private String SKU = "products";
     private String ACCDOC = "invoices";
@@ -51,12 +51,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void getData() throws UnirestException {
 
-        Date date = Calendar.getInstance().getTime();
+        Calendar date = Calendar.getInstance();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String today = dateFormat.format(date);
-
         DateFormat hourFormat = new SimpleDateFormat("yyyy-MM-dd HH");
-        String hour = hourFormat.format(date);
+        String today = dateFormat.format(date.getTime());
+        String hour = hourFormat.format(date.getTime());
+        date.add(Calendar.HOUR,-1);
+        String today1 = dateFormat.format(date.getTime());
+
 
         if (!hour.equals(CheckHour)) {
             String body = BodyRequest.GetbodyAuth(CLIENT_ID, CLIENT_SECRET);
@@ -67,11 +69,11 @@ public class TaskServiceImpl implements TaskService {
             AUTHEN = "Bearer " + jsonObject.getString("access_token");
             CheckHour = hour;
         }
-        crawlCustomer(today);
-        crawlAccdoc(today);
+        crawlCustomer(today1,today);
+        crawlAccdoc(today1,today);
     }
 
-    public void crawlCustomer(String today) throws UnirestException {
+    public void crawlCustomer(String today1,String today) throws UnirestException {
         String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
@@ -98,8 +100,8 @@ public class TaskServiceImpl implements TaskService {
         log.info("done");
     }
 
-    public void crawlAccdoc(String today) throws UnirestException {
-//        String param = "?format=json&fromPurchaseDate=2022-08-10T00:00:00&toPurchaseDate=2022-08-10T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
+    public void crawlAccdoc(String today1,String today) throws UnirestException {
+//        String param = "?format=json&fromPurchaseDate=2022-08-13T00:00:00&toPurchaseDate=2022-08-14T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
         String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
 //        String param = "?fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
