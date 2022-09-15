@@ -2,10 +2,12 @@ package com.fastwok.crawler.services.impl;
 
 import com.fastwok.crawler.entities.AccDoc;
 import com.fastwok.crawler.entities.Customer;
+import com.fastwok.crawler.entities.Item;
 import com.fastwok.crawler.entities.UpdateStatus;
 import com.fastwok.crawler.repository.AccDocRepository;
 import com.fastwok.crawler.repository.AccDocSaleRepository;
 import com.fastwok.crawler.repository.CustomerRepository;
+import com.fastwok.crawler.repository.ItemRepository;
 import com.fastwok.crawler.services.isservice.TaskService;
 import com.fastwok.crawler.util.AccdocUtil;
 import com.fastwok.crawler.util.BodyRequest;
@@ -36,11 +38,13 @@ public class TaskServiceImpl implements TaskService {
     AccDocSaleRepository accDocSaleRepository;
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    ItemRepository itemRepository;
     String AUTHEN = "";
     private String CLIENT_SECRET = "9BE94DC179BB890F4AB1DC7EFF16F819B10C11C5";
     private String CLIENT_ID = "2c181bb5-10a9-4063-8a94-9e89f20564f0";
     private String URL_TOKEN = "https://id.kiotviet.vn/connect/token";
-    private String URL_API = "https://public.kiotapi2.com/";
+    private String URL_API = "https://public.kiotapi.com/";
     private String CUSTOMER = "customers";
     private String SKU = "products";
     private String ACCDOC = "invoices";
@@ -50,6 +54,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void getData() throws UnirestException {
+
 
         Calendar date = Calendar.getInstance();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -71,9 +76,31 @@ public class TaskServiceImpl implements TaskService {
         }
         crawlCustomer(today1,today);
         crawlAccdoc(today1,today);
+        crawlItem();
     }
 
-    public void crawlCustomer(String today1,String today) throws UnirestException {
+    public void crawlItem() {
+        List<Item> items = itemRepository.getData();
+        if (!(items == null || items.isEmpty())) {
+            items.forEach((element) -> {
+                try {
+                    HttpResponse<JsonNode> authen = Api(URL_API + SKU + "/code/" + element.getCode().trim());
+                    JSONObject res = new JSONObject(authen.getBody());
+                    JSONObject jsonObject = res.getJSONObject("object");
+                    element.setKiot_Id(jsonObject.getLong("id")+"");
+                    itemRepository.save(element);
+                } catch (UnirestException e) {
+                    if (URL_API.equals("https://public.kiotapi.com/"))
+                        URL_API = "https://public.kiotapi2.com/";
+                    else URL_API = "https://public.kiotapi.com/";
+                    log.info(e.toString());
+                }
+            });
+            accDocRepository.runInventory();
+        }
+    }
+
+    public void crawlCustomer(String today1, String today) throws UnirestException {
         String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
@@ -83,7 +110,7 @@ public class TaskServiceImpl implements TaskService {
         if (customers.isEmpty()) return;
         customers.forEach(customer -> {
             List<Customer> checkKiotId = customerRepository.findCustomerByKiotId(customer.getKiot_Id());
-            if (checkKiotId.size()>0) return;
+            if (checkKiotId.size() > 0) return;
             Customer checkCode = customerRepository.findCustomerByCode(customer.getCode());
             if (checkCode != null) {
                 if (checkCode.getPersonTel().equals(customer.getPersonTel())) {
@@ -100,7 +127,7 @@ public class TaskServiceImpl implements TaskService {
         log.info("done");
     }
 
-    public void crawlAccdoc(String today1,String today) throws UnirestException {
+    public void crawlAccdoc(String today1, String today) throws UnirestException {
 //        String param = "?format=json&fromPurchaseDate=2022-08-13T00:00:00&toPurchaseDate=2022-08-14T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
         String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
 //        String param = "?fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&pageSize=100";
@@ -127,6 +154,7 @@ public class TaskServiceImpl implements TaskService {
             }
         });
     }
+
     private HttpResponse<JsonNode> OAuth2(String body)
             throws UnirestException {
         Date date = new Date();
