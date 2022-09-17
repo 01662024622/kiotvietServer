@@ -101,7 +101,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public void crawlCustomer(String today1, String today) throws UnirestException {
-        String paramCustomer = "?lastModifiedFrom=" + today + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
+        String paramCustomer = "?lastModifiedFrom=" + today1 + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
@@ -128,8 +128,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public void crawlAccdoc(String today1, String today) throws UnirestException {
-//        String param = "?format=json&fromPurchaseDate=2022-08-13T00:00:00&toPurchaseDate=2022-08-14T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
-        String param = "?format=json&fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
+//        String param = "?format=json&fromPurchaseDate=2022-09-16T00:00:00&toPurchaseDate=2022-09-16T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
+        String param = "?format=json&fromPurchaseDate=" + today1 + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
 //        String param = "?fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
         JSONObject res = new JSONObject(authen.getBody());
