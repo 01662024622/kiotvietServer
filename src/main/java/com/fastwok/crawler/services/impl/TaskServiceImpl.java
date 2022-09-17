@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -61,7 +62,7 @@ public class TaskServiceImpl implements TaskService {
         DateFormat hourFormat = new SimpleDateFormat("yyyy-MM-dd HH");
         String today = dateFormat.format(date.getTime());
         String hour = hourFormat.format(date.getTime());
-        date.add(Calendar.HOUR,-1);
+        date.add(Calendar.MINUTE,-5);
         String today1 = dateFormat.format(date.getTime());
 
 
@@ -74,7 +75,7 @@ public class TaskServiceImpl implements TaskService {
             AUTHEN = "Bearer " + jsonObject.getString("access_token");
             CheckHour = hour;
         }
-        crawlCustomer(today1,today);
+        crawlCustomer(today1);
         crawlAccdoc(today1,today);
         crawlItem();
     }
@@ -100,8 +101,8 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    public void crawlCustomer(String today1, String today) throws UnirestException {
-        String paramCustomer = "?lastModifiedFrom=" + today1 + "&orderBy=modifiedDate&orderDirection=desc&pageSize=100";
+    public void crawlCustomer(String today1) throws UnirestException {
+        String paramCustomer = "?lastModifiedFrom=" + today1 + "&orderBy=createdDate&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + paramCustomer);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
@@ -124,13 +125,10 @@ public class TaskServiceImpl implements TaskService {
             }
             customerRepository.save(customer);
         });
-        log.info("done");
     }
 
     public void crawlAccdoc(String today1, String today) throws UnirestException {
-//        String param = "?format=json&fromPurchaseDate=2022-09-16T00:00:00&toPurchaseDate=2022-09-16T23:59:00&orderBy=id&orderDirection=desc&pageSize=100";
         String param = "?format=json&fromPurchaseDate=" + today1 + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
-//        String param = "?fromPurchaseDate=" + today + "T00:00:00&toPurchaseDate=" + today + "T23:59:00&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
         JSONObject res = new JSONObject(authen.getBody());
         JSONObject jsonObject = res.getJSONObject("object");
@@ -138,13 +136,14 @@ public class TaskServiceImpl implements TaskService {
         log.info(jsonObject.toString());
         List<AccDoc> accdocs = AccdocUtil.convert(jsonObject.getJSONArray("data"));
         if (accdocs.isEmpty()) return;
+        AtomicInteger i= new AtomicInteger();
         accdocs.forEach(accdoc -> {
             Optional<AccDoc> checkId = accDocRepository.findById(accdoc.getId());
             if (checkId.isPresent()) return;
+            i.addAndGet(1);
             accDocRepository.save(accdoc);
             accDocSaleRepository.saveAll(accdoc.getAccDocSales());
             accDocRepository.runExec(accdoc.getId());
-            accDocRepository.runInventory();
             UpdateStatus updateStatus = accDocRepository.updateStatus(accdoc.getId());
             String updateStatusBody = BodyRequest.UpdateAccdoc(updateStatus.getDescription(), updateStatus.getStatus());
             try {
@@ -153,6 +152,8 @@ public class TaskServiceImpl implements TaskService {
                 e.printStackTrace();
             }
         });
+        if (i.get()>0)
+            accDocRepository.runInventory();
     }
 
     private HttpResponse<JsonNode> OAuth2(String body)
