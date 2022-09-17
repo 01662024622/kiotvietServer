@@ -42,15 +42,15 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     ItemRepository itemRepository;
     String AUTHEN = "";
-    private String CLIENT_SECRET = "9BE94DC179BB890F4AB1DC7EFF16F819B10C11C5";
-    private String CLIENT_ID = "2c181bb5-10a9-4063-8a94-9e89f20564f0";
-    private String URL_TOKEN = "https://id.kiotviet.vn/connect/token";
+    private final String CLIENT_SECRET = "9BE94DC179BB890F4AB1DC7EFF16F819B10C11C5";
+    private final String CLIENT_ID = "2c181bb5-10a9-4063-8a94-9e89f20564f0";
+    private final String URL_TOKEN = "https://id.kiotviet.vn/connect/token";
     private String URL_API = "https://public.kiotapi.com/";
-    private String CUSTOMER = "customers";
-    private String SKU = "products";
-    private String ACCDOC = "invoices";
+    private final String CUSTOMER = "customers";
+    private final String SKU = "products";
+    private final String ACCDOC = "invoices";
     private String CheckHour = "";
-    private String TOKEN = "1233453567";
+    private final String TOKEN = "1233453567";
 
 
     @Override
@@ -68,15 +68,15 @@ public class TaskServiceImpl implements TaskService {
 
         if (!hour.equals(CheckHour)) {
             String body = BodyRequest.GetbodyAuth(CLIENT_ID, CLIENT_SECRET);
-            HttpResponse<JsonNode> authen = OAuth2(body);
-            JSONObject res = new JSONObject(authen.getBody());
+            HttpResponse<JsonNode> authed = OAuth2(body);
+            JSONObject res = new JSONObject(authed.getBody());
             JSONObject jsonObject = res.getJSONObject("object");
             if (!jsonObject.has("access_token")) return;
             AUTHEN = "Bearer " + jsonObject.getString("access_token");
             CheckHour = hour;
         }
         crawlCustomer(today1);
-        crawlAccdoc(today1,today);
+        crawlAccDoc(today1,today);
         crawlItem();
     }
 
@@ -127,7 +127,7 @@ public class TaskServiceImpl implements TaskService {
         });
     }
 
-    public void crawlAccdoc(String today1, String today) throws UnirestException {
+    public void crawlAccDoc(String today1, String today) throws UnirestException {
         String param = "?format=json&fromPurchaseDate=" + today1 + "T00:00:00&toPurchaseDate=" + today + "&orderBy=id&orderDirection=desc&pageSize=100";
         HttpResponse<JsonNode> authen = Api(URL_API + ACCDOC + param);
         JSONObject res = new JSONObject(authen.getBody());
@@ -147,7 +147,7 @@ public class TaskServiceImpl implements TaskService {
             UpdateStatus updateStatus = accDocRepository.updateStatus(accdoc.getId());
             String updateStatusBody = BodyRequest.UpdateAccdoc(updateStatus.getDescription(), updateStatus.getStatus());
             try {
-                PUT(URL_API + ACCDOC + "/" + updateStatus.getId(), updateStatusBody);
+                Put(URL_API + ACCDOC + "/" + updateStatus.getId(), updateStatusBody);
             } catch (UnirestException e) {
                 e.printStackTrace();
             }
@@ -195,11 +195,11 @@ public class TaskServiceImpl implements TaskService {
                 .asJson();
     }
 
-    private HttpResponse<JsonNode> PUT(String url, String body)
+    private void Put(String url, String body)
             throws UnirestException {
         Date date = new Date();
         long timeMilli = date.getTime();
-        return Unirest.put(url)
+        Unirest.put(url)
                 .header("Accept", "*/*")
                 .header("Authorization", AUTHEN)
                 .header("Retailer", "earldom")
