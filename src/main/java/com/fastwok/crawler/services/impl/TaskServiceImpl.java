@@ -50,7 +50,6 @@ public class TaskServiceImpl implements TaskService {
     private final String SKU = "products";
     private final String ACCDOC = "invoices";
     private String CheckHour = "";
-    private final String TOKEN = "1233453567";
 
 
     @Override
