@@ -76,7 +76,6 @@ public class TaskServiceImpl implements TaskService {
         }
         crawlCustomer(today1);
         crawlAccDoc(today1,today);
-        crawlItem();
     }
 
     public void crawlItem() {
@@ -87,8 +86,10 @@ public class TaskServiceImpl implements TaskService {
                     HttpResponse<JsonNode> authen = Api(URL_API + SKU + "/code/" + element.getCode().trim());
                     JSONObject res = new JSONObject(authen.getBody());
                     JSONObject jsonObject = res.getJSONObject("object");
-                    element.setKiot_Id(jsonObject.getLong("id")+"");
-                    itemRepository.save(element);
+                    if(jsonObject.has("id")) {
+                        element.setKiot_Id(jsonObject.getLong("id")+"");
+                        itemRepository.save(element);
+                    }
                 } catch (UnirestException e) {
                     if (URL_API.equals("https://public.kiotapi.com/"))
                         URL_API = "https://public.kiotapi2.com/";
@@ -97,6 +98,27 @@ public class TaskServiceImpl implements TaskService {
                 }
             });
             accDocRepository.runInventory();
+        }
+    }
+    public void updateCustomer() {
+        List<Customer> items = customerRepository.getData();
+        if (!(items == null || items.isEmpty())) {
+            items.forEach((element) -> {
+                try {
+                    HttpResponse<JsonNode> authen = Api(URL_API + CUSTOMER + "/code/" + element.getCode().trim());
+                    JSONObject res = new JSONObject(authen.getBody());
+                    JSONObject jsonObject = res.getJSONObject("object");
+                    if(jsonObject.has("id")) {
+                        element.setKiot_Id(jsonObject.getLong("id")+"");
+                        customerRepository.save(element);
+                    }
+                } catch (UnirestException e) {
+                    if (URL_API.equals("https://public.kiotapi.com/"))
+                        URL_API = "https://public.kiotapi2.com/";
+                    else URL_API = "https://public.kiotapi.com/";
+                    log.info(e.toString());
+                }
+            });
         }
     }
 
@@ -116,10 +138,12 @@ public class TaskServiceImpl implements TaskService {
                 if (checkCode.getPersonTel().equals(customer.getPersonTel())) {
                     checkCode.setKiot_Id(customer.getKiot_Id());
                     customer = checkCode;
-                }
+                }else
                 if (checkCode.getTel().equals(customer.getTel())) {
                     checkCode.setKiot_Id(customer.getKiot_Id());
                     customer = checkCode;
+                }else {
+                    customer.setCode(customer.getCode()+"T");
                 }
             }
             customerRepository.save(customer);
